@@ -1,0 +1,28 @@
+{
+  "name": "google-home-notifier-offline",
+  "version": "0.0.1",
+  "description": "",
+  "main": "google-home-notifier-offline.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Orce MARINKOVSKI",
+  "keywords": [
+    "google home",
+    "notifications",
+    "notifier",
+    "notify",
+    "offline"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orcema/google-home-notifier-offline.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "castv2-client": "^1.2.0",
+    "google-tts-api": "latest",
+    "bluebird": "3.5.1",
+    "protobufjs": ">=5.0.3"
+  }
+}
