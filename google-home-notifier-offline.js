@@ -5,20 +5,78 @@ const EventEmitter = require('events');
 var DefaultMediaReceiver = require('castv2-client').DefaultMediaReceiver;
 var Googletts = require('google-tts-api');
 var net = require('net');
+var fs = require('fs');
+var ip = require("ip");
+
+var request = require('request');
+var path = require('path');
 
 var actualVolume=0; // actual Volume of the assistant
 var emitVolume=20/100; // volume level to use for notificaiton/play
 var playerState="IDLE"; // holds the player status
+var cacheFolder = "" // default init to no cache folder
+var httpServer = "";
+var httpServerPort ="8081"; // default port for serving mp3
+
+function localFileServerClose(callback){
+  if (httpServer!=="") {
+    httpServer.close(function(){
+      httpServer="";
+    });
+  }
+  callback();
+}
+
+function localFileServerStart(){
+
+    const FileServer = require('file-server');
+    
+    const fileServer = new FileServer((error, request, response) => {
+        response.statusCode = error.code || 500;
+        response.end("404: Not Found " +request.url);
+    });
+    
+    const serveRobots = fileServer.serveDirectory(cacheFolder, {
+      '.mp3':'audio/mpeg'
+    });
+
+    httpServer = require('http') 
+    .createServer(serveRobots)
+    .listen(httpServerPort);
+    console.log ("fileServer listening on port " + httpServerPort);
+  
+}
+
+function localFileServerRestart(){
+  if (httpServer===""){
+    localFileServerStart();
+  }else{
+    localFileServerClose(function(){
+      localFileServerStart();
+    })
+  }
+}
+
+function Download_Mp3(url, fileName){
+
+  var dstFilePath = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
+  request
+  .get(url)
+  .on('error', function(err) {
+    // handle error
+  })
+  .pipe(fs.createWriteStream(dstFilePath));
+}
 
 function GoogleHomeNotifier(deviceip, language, speed) {
-
+  
   this.deviceip = deviceip;
   this.language = language;
   this.speed = speed;
 
   var emitter = this;
 
-  this.setEmitVolume=function(pctVolume,callback){
+  this.setEmitVolume=function(pctVolume){
     
     if (pctVolume!=undefined){ // if not defined then the (default/last set) emitValue will be used
       emitVolume=pctVolume;
@@ -27,7 +85,25 @@ function GoogleHomeNotifier(deviceip, language, speed) {
       if (emitVolume<0) emitVolume=0;
       if (emitVolume>1) emitVolume=emitVolume/100;
     }
-    callback();
+    return this;
+  }
+
+  this.setCacheFolder=function(cacheFolderToUse){
+    if(cacheFolderToUse!=="" && cacheFolder!==cacheFolderToUse){
+      cacheFolder=cacheFolderToUse;
+      localFileServerRestart()
+    }
+    return this;
+  }
+
+  this.setFileServerPort=function(serverPortToSet){
+    if(serverPortToSet!=="" && httpServerPort!==serverPortToSet ){
+      httpServerPort=serverPortToSet;
+      if(cacheFolder!=="") {
+        localFileServerRestart();
+      }
+    }
+    return this;
   }
 
   this.notify = function (message, callback) {
@@ -43,13 +119,44 @@ function GoogleHomeNotifier(deviceip, language, speed) {
   };
 
   var getSpeechUrl = function (text, host, callback) {
-    Googletts(text, language, 1).then(function (url) {
-      onDeviceUp(host, url, function (res) {
-        callback(res);
-      });
-    }).catch(function (err) {
-      emitter.emit("error", err);
-    });
+
+
+    if(cacheFolder!==""){
+      let fileName=text.replace(/ /g,"_").toUpperCase() ;
+      let fileToCheckInCache = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
+
+      if (fs.existsSync(fileToCheckInCache)) {
+        let url="http://"+ip.address()+":"+httpServerPort+"/"+fileName+".mp3";
+        onDeviceUp(host, url, function (res) {
+          callback(res);
+        });
+
+      }else{
+        Googletts(text, language, 1).then(function (url) {
+          Download_Mp3(url,fileName);
+          onDeviceUp(host, url, function (res) {
+            callback(res);
+          });            
+        }).catch(function (err) {
+          emitter.emit("error", err);
+        });        
+        
+      }
+
+    }else{
+      Googletts(text, language, 1).then(function (url) {
+        onDeviceUp(host, url, function (res) {
+          callback(res);
+        });            
+      }).catch(function (err) {
+        emitter.emit("error", err);
+      });       
+    }
+
+
+
+
+
   };
 
   var getPlayUrl = function (url, host, callback) {

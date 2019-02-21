@@ -23,6 +23,8 @@
     "castv2-client": "^1.2.0",
     "google-tts-api": "latest",
     "bluebird": "3.5.1",
-    "protobufjs": ">=5.0.3"
+    "protobufjs": ">=5.0.3",
+    "request": "2.88.0",
+    "file-server": "file:D:/DefaultInstall/UserData/nodejs/github/file-server"
   }
 }
