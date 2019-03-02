@@ -7,6 +7,7 @@ var Googletts = require('google-tts-api');
 var net = require('net');
 var fs = require('fs');
 var ip = require("ip");
+var network = require('network');
 
 var request = require('request');
 var path = require('path');
@@ -17,6 +18,7 @@ var playerState="IDLE"; // holds the player status
 var cacheFolder = "" // default init to no cache folder
 var httpServer = "";
 var httpServerPort ="8081"; // default port for serving mp3
+var serverIP="";
 
 function localFileServerClose(callback){
   if (httpServer!=="") {
@@ -70,6 +72,10 @@ function Download_Mp3(url, fileName){
 
 function GoogleHomeNotifier(deviceip, language, speed) {
   
+  network.get_private_ip(function(err, ip) {
+    serverIP=ip;
+  });
+
   this.deviceip = deviceip;
   this.language = language;
   this.speed = speed;
@@ -126,10 +132,10 @@ function GoogleHomeNotifier(deviceip, language, speed) {
       let fileToCheckInCache = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
 
       if (fs.existsSync(fileToCheckInCache)) {
-        let url="http://"+ip.address()+":"+httpServerPort+"/"+fileName+".mp3";
+        let url="http://"+serverIP+":"+httpServerPort+"/"+fileName+".mp3";
         onDeviceUp(host, url, function (res) {
           callback(res);
-        });
+        });          
 
       }else{
         Googletts(text, language, 1).then(function (url) {
