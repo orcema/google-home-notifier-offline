@@ -128,7 +128,7 @@ function GoogleHomeNotifier(deviceip, language, speed) {
 
 
     if(cacheFolder!==""){
-      let fileName=text.replace(/ /g,"_").toUpperCase() ;
+      let fileName=text.replace(/[^a-zA-Z0-9]/g,"_").toUpperCase() ;
       let fileToCheckInCache = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
 
       if (fs.existsSync(fileToCheckInCache)) {
