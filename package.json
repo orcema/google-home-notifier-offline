@@ -1,6 +1,6 @@
 {
   "name": "google-home-notifier-offline",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "google-home-notifier-offline.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "bluebird": "3.5.1",
     "protobufjs": ">=5.0.3",
     "request": "2.88.0",
-    "file-server": "git+https://github.com/orcema/file-server.git",
+    "file-server": "2.1.0",
     "network": "latest"
   }
 }
