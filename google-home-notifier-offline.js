@@ -61,7 +61,7 @@ function localFileServerRestart(){
 
 function Download_Mp3(url, fileName){
 
-  var dstFilePath = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
+  var dstFilePath = path.join(cacheFolder,fileName)+".mp3";
   request
   .get(url)
   .on('error', function(err) {
@@ -129,7 +129,7 @@ function GoogleHomeNotifier(deviceip, language, speed) {
 
     if(cacheFolder!==""){
       let fileName=text.replace(/[^a-zA-Z0-9]/g,"_").toUpperCase() ;
-      let fileToCheckInCache = path.resolve(cacheFolder+"\\"+fileName)+".mp3";
+      let fileToCheckInCache = path.join(cacheFolder,fileName)+".mp3";
 
       if (fs.existsSync(fileToCheckInCache)) {
         let url="http://"+serverIP+":"+httpServerPort+"/"+fileName+".mp3";
