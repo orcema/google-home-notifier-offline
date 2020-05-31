@@ -1,0 +1,2 @@
+rd /S/Q C:\Users\orce\.node-red\node_modules\google-home-notifier-offline
+mklink /J C:\Users\orce\.node-red\node_modules\google-home-notifier-offline D:\DefaultInstall\UserData\nodejs\node-red-custom-nodes\google-home-notifier-offline
