@@ -14,6 +14,7 @@ var path = require('path');
 
 var actualVolume=0; // actual Volume of the assistant
 var emitVolume=20/100; // volume level to use for notificaiton/play
+var textSpeed = 0.01; // speak speed value between 0.1 up to 1
 var previousPlayerState="IDLE"; // holds the player status
 var cacheFolder = "" // default init to no cache folder
 var httpServer = "";
@@ -64,7 +65,7 @@ function localFileServerRestart(){
 
 function Download_Mp3(url, fileName){
 
-  var dstFilePath = path.join(cacheFolder,fileName)+".mp3";
+  var dstFilePath = path.join(cacheFolder,fileName);
   request
   .get(url)
   .on('error', function(err) {
@@ -132,7 +133,8 @@ function GoogleHomeNotifier(deviceip, language, speed) {
 
     if(cacheFolder!==""){
       let fileName=text.replace(/[^a-zA-Z0-9]/g,"_").toUpperCase() ;
-      let fileToCheckInCache = path.join(cacheFolder,fileName)+".mp3";
+      const fileNameWithSpeed = fileName + "-" +textSpeed + ".mp3";
+      let fileToCheckInCache = path.join(cacheFolder,fileNameWithSpeed );
 
       if (fs.existsSync(fileToCheckInCache)) {
         let url="http://"+serverIP+":"+httpServerPort+"/"+fileName+".mp3";
@@ -141,8 +143,8 @@ function GoogleHomeNotifier(deviceip, language, speed) {
         });          
 
       }else{
-        Googletts(text, language, 1).then(function (url) {
-          Download_Mp3(url,fileName);
+        Googletts(text, language, textSpeed).then(function (url) {
+          Download_Mp3(url,fileNameWithSpeed);
           onDeviceUp(host, url, function (res) {
             callback(res);
           });            
@@ -153,7 +155,7 @@ function GoogleHomeNotifier(deviceip, language, speed) {
       }
 
     }else{
-      Googletts(text, language, 1).then(function (url) {
+      Googletts(text, language, textSpeed).then(function (url) {
         onDeviceUp(host, url, function (res) {
           callback(res);
         });            
