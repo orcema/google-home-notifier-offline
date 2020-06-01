@@ -14,7 +14,7 @@ var path = require('path');
 
 var actualVolume=0; // actual Volume of the assistant
 var emitVolume=20/100; // volume level to use for notificaiton/play
-var textSpeed = 0.01; // speak speed value between 0.1 up to 1
+var textSpeed = 1; // speak speed value between 0.1 up to 1
 var previousPlayerState="IDLE"; // holds the player status
 var cacheFolder = "" // default init to no cache folder
 var httpServer = "";
@@ -83,6 +83,10 @@ function GoogleHomeNotifier(deviceip, language, speed) {
   this.speed = speed;
 
   var emitter = this;
+  this.setSpeechSpeed = (readSpeed) => {
+      textSpeed = parseFloat(readSpeed);
+      return this;
+  }
 
   this.setEmitVolume=function(pctVolume){
     
