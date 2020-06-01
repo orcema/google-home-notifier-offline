@@ -34,7 +34,6 @@ function localFileServerClose(callback){
 }
 
 function localFileServerStart(){
-
     const FileServer = require('file-server');
     
     const fileServer = new FileServer((error, request, response) => {
@@ -75,10 +74,9 @@ function Download_Mp3(url, fileName){
 }
 
 function GoogleHomeNotifier(deviceip, language, speed) {
-  
-  network.get_private_ip(function(err, ip) {
-    serverIP=ip;
-  });
+  require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+    serverIP=add
+  })
 
   this.deviceip = deviceip;
   this.language = language;
