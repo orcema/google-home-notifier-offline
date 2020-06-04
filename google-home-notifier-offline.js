@@ -139,7 +139,7 @@ function GoogleHomeNotifier(deviceip, language, speed) {
       let fileToCheckInCache = path.join(cacheFolder,fileNameWithSpeed );
 
       if (fs.existsSync(fileToCheckInCache)) {
-        let url="http://"+serverIP+":"+httpServerPort+"/"+fileName+".mp3";
+        let url="http://"+serverIP+":"+httpServerPort+"/"+fileNameWithSpeed;
         onDeviceUp(host, url, function (res) {
           callback(res);
         });          

@@ -1,6 +1,6 @@
 {
   "name": "google-home-notifier-offline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "google-home-notifier-offline.js",
   "scripts": {
