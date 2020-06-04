@@ -5,6 +5,9 @@ This is a fork of the google-home-notifier-library:
 **important:**<br>
 **offline** refers to the announcement text being played from a local folder, but you still need an internet connection for casting to your google device, this i due to the google casting architecture.
 
+**version 1.0.2:**
+fix: url to play from localserver on linux host
+
 **version 1.0.1:**
 fix: url to play from localserver
 

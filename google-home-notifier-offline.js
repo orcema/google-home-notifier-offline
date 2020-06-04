@@ -48,7 +48,7 @@ function localFileServerStart(){
     httpServer = require('http') 
     .createServer(serveRobots)
     .listen(httpServerPort);
-    console.log ("fileServer listening on port " + httpServerPort);
+    console.log ("fileServer listening on ip "+ serverIP +" and port " + httpServerPort);
   
 }
 
@@ -74,9 +74,9 @@ function Download_Mp3(url, fileName){
 }
 
 function GoogleHomeNotifier(deviceip, language, speed) {
-  require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-    serverIP=add
-  })
+  var ip = require("ip");
+  serverIP = ip.address();
+
 
   this.deviceip = deviceip;
   this.language = language;
