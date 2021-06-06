@@ -5,6 +5,10 @@ This is a fork of the google-home-notifier-library:
 **important:**<br>
 **offline** refers to the announcement text being played from a local folder, but you still need an internet connection for casting to your google device, this i due to the google casting architecture.
 
+**version 1.1.0:**
+fix: google tts doesn't support speed anymore. Have to choose value 1 for normal speed or less than 1 for slow.
+!Important: a cache folder has to be setup.
+
 **version 1.0.2:**
 fix: url to play from localserver on linux host
 

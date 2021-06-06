@@ -62,18 +62,19 @@ function localFileServerRestart() {
   }
 }
 
-function Download_Mp3(text, language, fileNameWithSpeedAndLanguage,playSlow) {
+function Download_Mp3(text, language, fileNameWithSpeedAndLanguage, playSlow, callback) {
 
   var dstFilePath = path.join(cacheFolder, fileNameWithSpeedAndLanguage);
   // get base64 text
   Googletts
     .getAudioBase64(text, { lang: language, slow: playSlow })
     .then((base64) => {
-      console.log({ base64 });
+      // console.log({ base64 });
 
       // save the audio file
       const buffer = Buffer.from(base64, 'base64');
       fs.writeFileSync(dstFilePath, buffer, { encoding: 'base64' });
+      callback();
     })
     .catch(console.error);
 }
@@ -138,43 +139,28 @@ function GoogleHomeNotifier(deviceip, language, speed) {
   var getSpeechUrl = function (text, host, callback) {
 
 
-    if (cacheFolder !== "") {
-      let fileName = text.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
-      const fileNameWithSpeedAndLanguage = fileName + "-" + textSpeed + ".mp3";
-      let fileToCheckInCache = path.join(cacheFolder, fileNameWithSpeedAndLanguage);
+    if (cacheFolder == "") {
+      emitter.emit("error", "please setup a cache folder");
+      return
+    }
+    let fileName = text.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
+    const fileNameWithSpeedAndLanguage = fileName + "-" + (textSpeed != 1 ? "slow" : "normal") + ".mp3";
+    let fileToCheckInCache = path.join(cacheFolder, fileNameWithSpeedAndLanguage);
+    let url = "http://" + serverIP + ":" + httpServerPort + "/" + fileNameWithSpeedAndLanguage;
 
-      if (fs.existsSync(fileToCheckInCache)) {
-        let url = "http://" + serverIP + ":" + httpServerPort + "/" + fileNameWithSpeedAndLanguage;
-        onDeviceUp(host, url, function (res) {
-          callback(res);
-        });
-
-      } else {
-        // Googletts(text, language, textSpeed).then(function (url) {
-          Download_Mp3(text, language, fileNameWithSpeedAndLanguage,(textSpeed=1?true:false));
-          onDeviceUp(host, url, function (res) {
-            callback(res);
-          });
-        // }).catch(function (err) {
-          // emitter.emit("error", err);
-        // });
-
-      }
+    if (fs.existsSync(fileToCheckInCache)) {
+      onDeviceUp(host, url, function (res) {
+        callback(res);
+      });
 
     } else {
-      Googletts(text, language, textSpeed).then(function (url) {
+      // Googletts(text, language, textSpeed).then(function (url) {
+      Download_Mp3(text, language, fileNameWithSpeedAndLanguage, (textSpeed != 1 ? true : false), () => {
         onDeviceUp(host, url, function (res) {
           callback(res);
         });
-      }).catch(function (err) {
-        emitter.emit("error", err);
       });
     }
-
-
-
-
-
   };
 
   var getPlayUrl = function (url, host, callback) {
