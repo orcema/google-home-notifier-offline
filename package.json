@@ -20,12 +20,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "castv2-client": "^1.2.0",
-    "google-tts-api": "latest",
     "bluebird": "3.5.1",
-    "protobufjs": ">=5.0.3",
-    "request": "2.88.0",
+    "castv2-client": "^1.2.0",
     "file-server": "2.1.0",
-    "network": "latest"
+    "google-tts-api": "latest",
+    "ip": "^1.1.5",
+    "network": "latest",
+    "protobufjs": ">=5.0.3",
+    "request": "2.88.0"
   }
 }
