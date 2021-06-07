@@ -22,7 +22,6 @@
   "dependencies": {
     "bluebird": "3.5.1",
     "castv2-client": "^1.2.0",
-    "file-server": "2.1.0",
     "google-tts-api": "latest",
     "ip": "^1.1.5",
     "network": "latest",
