@@ -87,7 +87,7 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
       deviceDetails.mediaFileName = cleanedMessage + "-" + deviceDetails.language + "-" + (deviceDetails.textSpeed != 1 ? "slow" : "normal") + ".mp3";
       let fileToCheckInCache = path.join(deviceDetails.cacheFolderInUse, deviceDetails.mediaFileName);
       deviceDetails.url = "http://" + deviceDetails.mediaServerIp + ":" + deviceDetails.mediaServerPortInUse + "/" + deviceDetails.mediaFileName;
-
+      console.log('media url: '+deviceDetails.url);
       if (fs.existsSync(fileToCheckInCache)) {
         resolve(deviceDetails);
 
