@@ -15,8 +15,8 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
     "language": language,
     "textSpeed": textSpeed,
     "mediaServerIp": mediaServerIp,
-    "mediaServerPort": mediaServerPort,
-    "cacheFolder": cacheFolder,
+    "mediaServerPortInUse": mediaServerPort,
+    "cacheFolderInUse": cacheFolder,
     "playVolumeLevel": defaultVolumeLevel
   };
   setupDeviceCommunicationAdapter();
@@ -80,13 +80,13 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
 
   function getSpeechUrl(deviceDetails) {
     return new Promise((resolve, reject) => {
-      if (deviceDetails.cacheFolder == "") {
+      if (deviceDetails.cacheFolderInUse == undefined) {
         reject("missing cache folder");
       }
       const cleanedMessage = deviceDetails.playMessage.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
       deviceDetails.mediaFileName = cleanedMessage + "-" + deviceDetails.language + "-" + (deviceDetails.textSpeed != 1 ? "slow" : "normal") + ".mp3";
-      let fileToCheckInCache = path.join(deviceDetails.cacheFolder, deviceDetails.mediaFileName);
-      deviceDetails.url = "http://" + deviceDetails.mediaServerIp + ":" + deviceDetails.mediaServerPort + "/" + deviceDetails.mediaFileName;
+      let fileToCheckInCache = path.join(deviceDetails.cacheFolderInUse, deviceDetails.mediaFileName);
+      deviceDetails.url = "http://" + deviceDetails.mediaServerIp + ":" + deviceDetails.mediaServerPortInUse + "/" + deviceDetails.mediaFileName;
 
       if (fs.existsSync(fileToCheckInCache)) {
         resolve(deviceDetails);
@@ -98,7 +98,7 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
           deviceDetails.language,
           deviceDetails.mediaFileName,
           (deviceDetails.textSpeed != 1 ? true : false),
-          deviceDetails.cacheFolder)
+          deviceDetails.cacheFolderInUse)
           .then(_ =>
             resolve(deviceDetails))
           .catch(e =>
@@ -216,7 +216,10 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
       deviceDetails.player.load(media, {
         autoplay: true
       }, function (err, status) {
-        if (err) reject("failed to load media, check media server in config")
+        if (err) {
+          console.error('media ' +deviceDetails.url+ ' not available',  err);
+          reject("failed to load media, check media server in config");
+        }
       });
 
       emitter.emit("status", 'playing voice message');
