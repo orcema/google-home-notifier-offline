@@ -7,7 +7,7 @@ const net = require('net');
 const fs = require('fs');
 const path = require('path');
 
-function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaServerPort, cacheFolder,defaultVolumeLevel) {
+function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaServerPort, cacheFolder, defaultVolumeLevel) {
 
   const emitter = this;
   const deviceDetails = {
@@ -17,7 +17,7 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
     "mediaServerIp": mediaServerIp,
     "mediaServerPort": mediaServerPort,
     "cacheFolder": cacheFolder,
-    "playVolumeLevel":defaultVolumeLevel
+    "playVolumeLevel": defaultVolumeLevel
   };
   setupDeviceCommunicationAdapter();
 
@@ -25,11 +25,7 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
     deviceDetails.playMessage = message;
     return getSpeechUrl(deviceDetails)
       .then(deviceDetails =>
-        playOnDevice(deviceDetails))
-      // .catch(e => {
-      //   emitter.emit("error", e);
-      //   console.error(e)
-      // });
+        playOnDevice(deviceDetails));
   };
 
   this.play = function (mp3_url, callback) {
@@ -97,9 +93,19 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
 
       } else {
         // Googletts(text, language, textSpeed).then(function (url) {
-        Download_Mp3(deviceDetails.playMessage, deviceDetails.language, deviceDetails.mediaFileName, (deviceDetails.textSpeed != 1 ? true : false), deviceDetails.cacheFolder, () => {
-          resolve(deviceDetails)
-        });
+        Download_Mp3(
+          deviceDetails.playMessage,
+          deviceDetails.language,
+          deviceDetails.mediaFileName,
+          (deviceDetails.textSpeed != 1 ? true : false),
+          deviceDetails.cacheFolder)
+          .then(_ =>
+            resolve(deviceDetails))
+          .catch(e =>
+            { console.error(e);
+              reject('failed to create the voice message');
+            })
+          ;
       }
     });
 
@@ -113,9 +119,10 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
 
   function Download_Mp3(text, language, fileNameWithSpeedAndLanguage, playSlow, cacheFolder, callback) {
 
-    var dstFilePath = path.join(cacheFolder, fileNameWithSpeedAndLanguage);
+    var dstFilePath = path.join(
+      createFolderIfNotExist(cacheFolder), fileNameWithSpeedAndLanguage);
     // get base64 text
-    Googletts
+    return Googletts
       .getAudioBase64(text, { lang: language, slow: playSlow })
       .then((base64) => {
         // console.log({ base64 });
@@ -125,7 +132,13 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
         fs.writeFileSync(dstFilePath, buffer, { encoding: 'base64' });
         callback();
       })
-      .catch(console.error);
+  }
+
+  function createFolderIfNotExist(folderToAssert){
+    if(!fs.existsSync(folderToAssert)){
+      fs.mkdirSync(folderToAssert);
+    }
+    return folderToAssert;
   }
 
   function setupSocket(deviceDetails) {
@@ -203,7 +216,7 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
       deviceDetails.player.load(media, {
         autoplay: true
       }, function (err, status) {
-        if (err) reject("failed to load media")
+        if (err) reject("failed to load media, check media server in config")
       });
 
       emitter.emit("status", 'playing voice message');
@@ -226,13 +239,13 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
     });
   }
 
-  this.setSpeechSpeed = function (textSpeed){
-  deviceDetails.textSpeed=textSpeed;
+  this.setSpeechSpeed = function (textSpeed) {
+    deviceDetails.textSpeed = textSpeed;
     return this;
   }
 
-  this.setEmitVolume = function (playVolumeLevel){
-  deviceDetails.playVolumeLevel=playVolumeLevel/100;
+  this.setEmitVolume = function (playVolumeLevel) {
+    deviceDetails.playVolumeLevel = playVolumeLevel / 100;
     return this;
   }
 
@@ -240,12 +253,12 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
 
 GoogleHomeNotifier.prototype.__proto__ = EventEmitter.prototype // inherit from EventEmitter
 
-module.exports = function (deviceip, language, speed, mediaServerIp, mediaServerPort, cacheFolder,defaultVolumeLevel) {
+module.exports = function (deviceip, language, speed, mediaServerIp, mediaServerPort, cacheFolder, defaultVolumeLevel) {
   if (deviceip && language) {
     if (!speed) {
       speed = 1
     };
-    return new GoogleHomeNotifier(deviceip, language, speed, mediaServerIp, mediaServerPort, cacheFolder,defaultVolumeLevel);
+    return new GoogleHomeNotifier(deviceip, language, speed, mediaServerIp, mediaServerPort, cacheFolder, defaultVolumeLevel);
   }
 }
 
