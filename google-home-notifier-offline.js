@@ -61,7 +61,6 @@ function GoogleHomeNotifier(deviceIp, language, textSpeed, mediaServerIp, mediaS
   function setupDeviceCommunicationAdapter() {
     return new Promise((resolve, reject) => {
       deviceDetails.defaultMediaReceiver = require('castv2-client').DefaultMediaReceiver;
-      console.log("new message -----");
       deviceDetails.device = new castV2();
 
       deviceDetails.device.on('error', function (err) {
